@@ -2,194 +2,27 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-	<title>Clapmap</title>
+	<title>Itaucard.Dash</title>
 	<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCKXW59nZs0VU_GjaizM0YzKQ6HM87mrzs&sensor=true"></script>
 	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 	<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/json2/20121008/json2.min.js"></script>	
 
 	<link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet">
 	<script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
-
+	<script src="http://crypto-js.googlecode.com/svn/tags/3.1.2/build/rollups/md5.js"></script>
+	<script src="http://crypto-js.googlecode.com/svn/tags/3.1.2/build/rollups/sha1.js"></script>	
 	<script type="text/javascript">
-		var map;
-		var geocoder;
-		var pos;
-		var infowindow;
-		var geocoderResults;
-		var API_KEY = 'AIzaSyCKXW59nZs0VU_GjaizM0YzKQ6HM87mrzs';
-		var freebaseResults;
-		var RT_API_KEY = 'tbjw5pnrsx5e6utwm9rrqjur';
-
-		function initialize() {
-			geocoder = new google.maps.Geocoder();
-			infowindow = new google.maps.InfoWindow();
-			var mapOptions = {
-				zoom: 8,
-				center: new google.maps.LatLng(-34.397, 150.644),
-				mapTypeId: google.maps.MapTypeId.ROADMAP
-			}
-			map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions);
-			
-		}
-		
 		$(document).ready(function() {
-			if(navigator.geolocation) {
-				navigator.geolocation.getCurrentPosition(function(position) {
-					pos = new google.maps.LatLng(position.coords.latitude,position.coords.longitude);
-					map.setCenter(pos);
-					//map.setZoom(15);
-					geocoder.geocode({'latLng': map.getCenter()}, function(results, status) {
-						geocoderResults = results;
-						if (status == google.maps.GeocoderStatus.OK) {
-							if (geocoderResults[1]) {
-								map.setZoom(15);
-								marker = new google.maps.Marker({
-									position: map.getCenter(),
-									map: map
-								});
-								infowindow.setContent(geocoderResults[1].formatted_address);
-								infowindow.open(map, marker);
-								//search freebase
-								freebaseSearch();
-								
-							} else {
-								alert('No results found');
-							}
-						} else {
-							alert('Geocoder failed due to: ' + status);
-						}
-					});
-				}, function() {
-					//handleNoGeolocation(true);
-				});
-			}
-			
-			$('form#search-form').submit(function(e) {
-				if($('input#search-box').val().length==0){
-					alert('invalid address');
-					return false;
-				}
-				$('.listResults').empty();
-				geocoder.geocode({'address': $('input#search-box').val().trim()}, function(results, status) {
-					geocoderResults = results;
-					if (status == google.maps.GeocoderStatus.OK) {
-						for(var i=0;i<geocoderResults.length;i++) {
-							var marker = new google.maps.Marker({
-								map: map,
-								position: geocoderResults[i].geometry.location
-							});
-							$('.listResults').append('<li><a href="#'+i+'">'+geocoderResults[i].formatted_address+'</a></li>');
-						}
-						
-						map.setCenter(geocoderResults[0].geometry.location);
-						
-						freebaseSearch();
-						
-						//infowindow.setContent(geocoderResults[0].formatted_address);
-						//infowindow.open(map, marker);
-					} else {
-						alert('No results found');
-					}
-				});
-				return false;
-			});
-			
-			$('ul.listResults').delegate('a','click',function(e){
-				$('input#search-box').val(geocoderResults[parseInt($(this).attr('href').replace('#',''))].formatted_address);
-				$('form#search-form').submit();
-				return false;
-			});
-		});
-		
-		function freebaseSearch() {
-			var locationString = geocoderResults[0].address_components[0].long_name;
-			//var freebaseQuery = [{'id':null, 'name':locationString, 'type':'/film/film_location', '/film/film_location/featured_in_films':[]}];
-			var freebaseQuery = [{
-				"id": null,
-				"name": null,
-				"type": "/film/film",
-				"featured_film_locations": [{
-					"name": locationString
-				}],
-				"initial_release_date": [],
-				"rottentomatoes_id": [],
-				"nytimes_id": [],
-				"imdb_id":[]
-			}];
-			var freebaseParams = {query:JSON.stringify(freebaseQuery), key:API_KEY};
-			//$.ajax('')
-			$('ul.listMovies').empty();
-			$.getJSON('https://www.googleapis.com/freebase/v1/mqlread?callback=?',freebaseParams,function(data) {
-				freebaseResults = data.result;
-				if(freebaseResults.length>0) {
-					var movieArray = freebaseResults;
-					for(var i=0;i<movieArray.length;i++)
-					{
-						var rottentomatoes_url = movieArray[i].rottentomatoes_id.length > 0 ? 'http://www.rottentomatoes.com/m/' + movieArray[i].rottentomatoes_id[0] : '#';
-						var release_date = movieArray[i].initial_release_date.length > 0 ? ' (' + movieArray[i].initial_release_date[0].substring(0,4) + ')' : '';
-						var nytimes_id = movieArray[i].nytimes_id.length > 0 ? movieArray[i].nytimes_id[0] : '';
-						var imdb_id = movieArray[i].imdb_id.length > 0 ? movieArray[i].imdb_id[0] : '';
-						var imdb_url = movieArray[i].imdb_id.length > 0 ? 'http://www.imdb.com/title/' + movieArray[i].imdb_id[0] + '/': '#';
-						$('ul.listMovies').append('<li><a href="'+imdb_url+'" target="_blank">'+movieArray[i].name + release_date + '</a></li>');
-						
-						//imdb id
-						if(imdb_id.length!=0) {
-							/*
-							$.getJSON('',function(data){
-								console.log(data);
-							});
-							*/
-							$.ajax({
-								url:'http://imdbapi.org/?id='+imdb_id+'&type=jsonp',
-							}).done(function(data){
-								eval(data);
-							});				
-								
-						}
-						
-					}
-				}
-					
-			});
-			//http://api.rottentomatoes.com/api/public/v1.0/movies.json?apikey='+RT_API_KEY+'&callback=qqwe
-		}
-		//imdb api return function
-		function imdbapi(imdbobj){
-			//console.log(imdbobj.filming_locations);
-			if(imdbobj.filming_locations!=undefined)
-			{
 				
-			}			
-		}
-		
-		//view-source:http://www.imdb.com/search/title?locations=Crozon,%20Finist%E8re,%20France
+		});
 	</script>
 	<style type="text/css">
-		html { height: 100%; font-size:11px; }
-		body { height: 100%; margin: 0; padding: 0; font-size:12px;}
-		#controls { width:20%; height: 100%; background-color:#f0f0f0; float:left; overflow-y: scroll;}
-		#map-canvas { width:80%; height: 100%;}
-		ul.listResults, ul.listMovies {list-style-type:none; padding:15px;}
-		ul.listResults li, ul.listMovies li {margin:10px 0;}
-		form#search-form {width:90%; margin:10px auto;}
-		#map-canvas img { 
-		  max-width: none !important;
-		}
-		#map-canvas label { 
-		  width: auto; display:inline; 
-		} 
-		h4.titleH4{text-align:center}
+		
 	</style>
 </head>
-<body onload="initialize()">
-	<div id="controls">
-		<form name="search-form" id="search-form">
-			<input type="text" name="s" id="search-box" class=""  />
-			<input type="submit" name="submit-button" class="btn" value="search" />
-		</form>
-		<ul class="listResults"></ul>
-		<h4 class="titleH4">Clapped in this location:</h4>
-		<ul class="listMovies"></ul>
-	</div>
-	<div id="map-canvas"></div>
+<body>
+	<label for="username">Username</label>
+	<input type="text" id="username" name="key" />
+	<label for="key">Key</label>
+	<input type="text" id="key" name="key" />
 </body>
