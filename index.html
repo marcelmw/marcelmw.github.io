@@ -12,14 +12,16 @@
 	<script src="http://crypto-js.googlecode.com/svn/tags/3.1.2/build/rollups/md5.js"></script>
 	<script src="http://crypto-js.googlecode.com/svn/tags/3.1.2/build/rollups/sha1.js"></script>
     <script src="http://crypto-js.googlecode.com/svn/tags/3.1.2/build/components/enc-base64-min.js"></script>
+    <script src="http://code.highcharts.com/highcharts.js"></script>
 	<script type="text/javascript">
-		var apiSecret = "";
+		var apiSecret;
        	var stUserName = "marcel.watanabe:Itau";
 		var nonce;
 		var timestamp;
 		var digest;
 		var encNonce;
 		$(document).ready(function() {
+			apiSecret = document.location.search.substring(1);
 			$('input#btLoad').click(function() {
 				nonce = getNonce();
 				timestamp = new Date().toISOString().split(".")[0]+"Z";
@@ -48,6 +50,10 @@
 					if ( console && console.log ) {
 						console.log( "Sample of data:", data );
 					}
+					
+					//chart
+					buildChart(data);
+					
 				});
 			});
 		});
@@ -63,18 +69,118 @@
 		function getDigest() {
 			return CryptoJS.enc.Base64.stringify(CryptoJS.SHA1(nonce+timestamp+apiSecret));
 		}
+		var chart1;
+		function buildChart(data) {
+			chart1 = $('#container1').highcharts({
+				credits:{enabled:false},chart: {backgroundColor:'rgba(255,255,255,0)'},title: {text: ''},legend: {enabled: false},
+				xAxis: {
+					lineColor: '#333',
+					tickColor: '#333',
+					title: {
+						text: ''
+					},
+					labels: {
+         				style: {color:'#c7c7c7'}
+					}
+				},
+				yAxis: {
+					gridLineColor: '#444',
+					title: {
+						text: ''
+					},
+					labels: {
+         				style: {color:'#c7c7c7'}
+					}
+				},
+				series:[
+						{
+							type:"area",
+							/*color:'rgba(255,0,0,1)',*/
+							color:Highcharts.theme.colors[0],
+							fillOpacity:0.5,
+							marker: {enabled:false},
+							data: shuffleArray([15915, 17385, 19055, 21205, 23044, 25393, 27935, 30062, 32049,15915, 17385, 19055, 21205, 23044, 25393, 27935, 30062, 32049,15915, 17385, 19055, 21205, 23044, 25393, 27935])	
+						},
+						{
+							type:"column",
+							/*color:'rgba(255,0,0,.8)',*/
+							color:Highcharts.theme.colors[7],
+							fillOpacity:.5,
+							data: shuffleArray([15915, 17385, 19055, 21205, 23044, 25393, 27935, 30062, 32049,15915, 17385, 19055, 21205, 23044, 25393, 27935, 30062, 32049,15915, 17385, 19055, 21205, 23044, 25393, 27935]),
+							borderWidth:0
+						}
+				]
+			});
+			var chart2 = $('#container2').highcharts({
+				credits:{enabled:false},chart: {backgroundColor:'rgba(255,255,255,0)'},title: {text: ''},
+				series:[
+						{
+							type:"pie",
+							data: [['orgânico',64],['direto',45],['bankline',23],['parcerias',87],['facebook',123],['google',94]],
+							dataLabels: {
+								enabled: false
+							},
+							borderWidth:0,
+							showInLegend: true
+
+						}
+				],
+				legend:{
+					itemStyle: {
+						color:"#c7c7c7"	
+					},
+					itemHoverStyle: {
+						color: '#FFF'
+					},
+				}
+			});
+		}
+		Highcharts.theme = {colors: ["#2b908f", "#90ee7e", "#f45b5b", "#7798BF", "#aaeeee", "#ff0066", "#eeaaee","#55BF3B", "#DF5353", "#7798BF", "#aaeeee"]};
+		Highcharts.setOptions(Highcharts.theme);
+		
+		function shuffleArray(array) {
+			for (var i = array.length - 1; i > 0; i--) {
+				var j = Math.floor(Math.random() * (i + 1));
+				var temp = array[i];
+				array[i] = array[j];
+				array[j] = temp;
+			}
+			return array;
+		}
 		
 	</script>
 	<style type="text/css">
-
+		body {
+			color:#c7c7c7; 
+			font-family:'Segoe UI Light','Helvetica Neue Light','Segoe UI','Helvetica Neue',Helvetica,'Trebuchet MS',Verdana,sans-serif;
+			background-color:#101214;
+			
+		}
+		
+		h5 {padding:8px; margin:0; background-color:#272727; color:#8b8b8b;}
+		.chartContainer {
+			float:left;
+			margin:10px; 
+			-webkit-box-shadow:#101214 0 0 8px;
+			box-shadow:#101214 0 0 8px;
+			/*border:1px solid rgba(255,255,255,.1);*/
+			background-color:#2a2a2a;
+			/*text-shadow:1px 1px #0e0e0e;*/
+		}
+		.chartContainer1 {width:50%;}
+		.chartContainer2 {width:45%;}
+		#container1, #container2 {height:200px;}
 	</style>
 </head>
 
-<body>
-	<label for="username">Username</label>
-	<input type="text" id="username" name="key" />
-	<label for="key">Key</label>
-	<input type="text" id="key" name="key" />
-    <input type="button" value="ok" id="btLoad" />
+<body onload="buildChart(0);">
+	<div class="chartContainer chartContainer1">
+    	<h5>PROPOSTAS</h5>
+    	<div id="container1"></div>
+    </div>
+	<div class="chartContainer chartContainer2">
+    	<h5>ORIGEM</h5>
+    	<div id="container2"></div>
+    </div>    
 </body>
 </html>
