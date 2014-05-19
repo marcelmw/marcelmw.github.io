@@ -157,7 +157,7 @@
 			
 		}
 		
-		h5 {padding:8px; margin:0; background-color:#272727; color:#8b8b8b;}
+		h5 {padding:8px; margin:0; background-color:#272727; color:#8b8b8b;font-size:12px;text-shadow:1px 1px #0e0e0e;}
 		.chartContainer {
 			float:left;
 			margin:10px; 
@@ -167,13 +167,19 @@
 			background-color:#2a2a2a;
 			/*text-shadow:1px 1px #0e0e0e;*/
 		}
-		.chartContainer1 {width:50%;}
-		.chartContainer2 {width:45%;}
+		.chartContainer1 {width:40%;}
+		.chartContainer2 {width:35%;}
 		#container1, #container2 {height:200px;}
+		.spnTotal {font-size:60px; color:#d3d4d4; text-shadow:1px 1px #0e0e0e; padding:10px; line-height:80px;margin:20px;}
 	</style>
 </head>
 
+
 <body onload="buildChart(0);">
+	<div class="chartContainer chartContainer3">
+    	<h5>PROPOSTAS ONLINE</h5>
+    	<span class="spnTotal">9.672</span>
+    </div>    
 	<div class="chartContainer chartContainer1">
     	<h5>PROPOSTAS</h5>
     	<div id="container1"></div>
