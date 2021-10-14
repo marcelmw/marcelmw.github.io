@@ -21,7 +21,7 @@
 		var freebaseResults;
 		var RT_API_KEY = 'tbjw5pnrsx5e6utwm9rrqjur';
 
-		function initialize() {
+		function initMap() {
 			geocoder = new google.maps.Geocoder();
 			infowindow = new google.maps.InfoWindow();
 			var mapOptions = {
@@ -182,7 +182,7 @@
 		h4.titleH4{text-align:center}
 	</style>
 </head>
-<body onload="initialize()">
+<body>
 	<div id="controls">
 		<form name="search-form" id="search-form">
 			<input type="text" name="s" id="search-box" class=""  />
